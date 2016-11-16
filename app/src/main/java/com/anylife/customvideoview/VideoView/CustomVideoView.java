@@ -56,7 +56,7 @@ import java.util.Vector;
  * <em>Note: VideoView does not retain its full state when going into the
  * background.</em>  In particular, it does not restore the current play state,
  * play position, selected tracks, or any subtitle tracks added via
- * {@link #addSubtitleSource addSubtitleSource()}.  Applications should
+ * Applications should
  * save and restore these on their own in
  * {@link android.app.Activity#onSaveInstanceState} and
  * {@link android.app.Activity#onRestoreInstanceState}.<p>
@@ -105,19 +105,19 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl{
     private boolean     mCanSeekBack;
     private boolean     mCanSeekForward;
 
+     Context mContext;
 
-
-    public VideoView(Context context) {
+    public CustomVideoView(Context context) {
         super(context);
         initVideoView();
     }
 
-    public VideoView(Context context, AttributeSet attrs) {
+    public CustomVideoView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
         initVideoView();
     }
 
-    public VideoView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public CustomVideoView(Context context, AttributeSet attrs, int defStyleAttr) {
 //        this(context, attrs, defStyleAttr, 0);
         super(context, attrs, defStyleAttr);
         initVideoView();
@@ -317,7 +317,7 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl{
             mMediaPlayer = new MediaPlayer();
             // TODO: create SubtitleController in MediaPlayer, but we need
             // a context for the subtitle renderers
-            final Context context = getContext();
+//            final Context context = getContext();
 
 
 //            final SubtitleController controller = new SubtitleController(
@@ -410,18 +410,21 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl{
         public void onPrepared(MediaPlayer mp) {
             mCurrentState = STATE_PREPARED;
 
-            // Get the capabilities of the player for this stream
-            Metadata data = mp.getMetadata(MediaPlayer.METADATA_ALL,
-                                      MediaPlayer.BYPASS_METADATA_FILTER);
+//            // Get the capabilities of the player for this stream
+//            Metadata data = mp.getMetadata(MediaPlayer.METADATA_ALL,
+//                                      MediaPlayer.BYPASS_METADATA_FILTER);
+//
+//            if (data != null) {
+//                mCanPause = !data.has(Metadata.PAUSE_AVAILABLE)
+//                        || data.getBoolean(Metadata.PAUSE_AVAILABLE);
+//                mCanSeekBack = !data.has(Metadata.SEEK_BACKWARD_AVAILABLE)
+//                        || data.getBoolean(Metadata.SEEK_BACKWARD_AVAILABLE);
+//                mCanSeekForward = !data.has(Metadata.SEEK_FORWARD_AVAILABLE)
+//                        || data.getBoolean(Metadata.SEEK_FORWARD_AVAILABLE);
+//            } else
 
-            if (data != null) {
-                mCanPause = !data.has(Metadata.PAUSE_AVAILABLE)
-                        || data.getBoolean(Metadata.PAUSE_AVAILABLE);
-                mCanSeekBack = !data.has(Metadata.SEEK_BACKWARD_AVAILABLE)
-                        || data.getBoolean(Metadata.SEEK_BACKWARD_AVAILABLE);
-                mCanSeekForward = !data.has(Metadata.SEEK_FORWARD_AVAILABLE)
-                        || data.getBoolean(Metadata.SEEK_FORWARD_AVAILABLE);
-            } else {
+
+            {
                 mCanPause = mCanSeekBack = mCanSeekForward = true;
             }
 
