@@ -3,6 +3,7 @@ package com.anylife.customvideoview;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.MediaController;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.anylife.customvideoview.VideoView.CustomVideoView;
@@ -19,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Toast.makeText(this,"NHK Playing ...",Toast.LENGTH_LONG).show();
 
 //        VideoView vv = (VideoView)findViewById(R.id.videoView1);
 //        vv.setVideoPath("http://chyd-wsvod.wasu.tv/data13/ott/344/2015-05/28/1432782476341_377935/playlist.m3u8");

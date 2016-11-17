@@ -14,6 +14,8 @@
         android:layout_width="match_parent"
         android:layout_height="220dp"
         android:layout_marginTop="20dp"
+        android:visibility="gone"
+
         />
 
     <com.anylife.customvideoview.LiveVideoView
@@ -28,7 +30,6 @@
         android:id="@+id/custom_videoView"
         android:layout_width="match_parent"
         android:layout_height="220dp"
-        android:layout_marginTop="20dp"
         />
 
 

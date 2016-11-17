@@ -368,14 +368,13 @@ public class LiveVideoView extends SurfaceView implements MediaPlayerControl {
             new OnErrorListener() {
                 public boolean onError(MediaPlayer mp, int framework_err, int impl_err) {
                     Log.e(TAG2, "有 错误发生：Error: " + framework_err + "," + impl_err);
-                    mediaErrorDispose(framework_err, impl_err);
+//                    mediaErrorDispose(framework_err, impl_err);
 
-//                    playNextVideo();
-//                    if (mOnErrorListener != null) {
-//                        if (mOnErrorListener.onError(mMediaPlayer, framework_err, impl_err)) {
-//                            return true;
-//                        }
-//                    }
+                    if (mOnErrorListener != null) {
+                        if (mOnErrorListener.onError(mMediaPlayer, framework_err, impl_err)) {
+                            return true;
+                        }
+                    }
 
                     /**
                      * 异常的处理，如果出现了异常就处理，稳定性没有测试过，这个真的太难测试了

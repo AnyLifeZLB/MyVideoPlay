@@ -199,31 +199,28 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 		mTargetState = STATE_IDLE;
 	}
 
-
-
 	private Uri mUri;
 
+	private List<String> videoPaths = new ArrayList<>();
+	private int currentVideoIndex = 0;
 
-	List<String> videoPaths=new ArrayList<>();
-	int currentVideoIndex=0;
 	/**
-	 *
+	 * 设置播放路径集合
 	 * @param videoPathsArg
 	 */
-	public void setVideoPaths(@NonNull List<String> videoPathsArg){
-		currentVideoIndex=0;
-
+	public void setVideoPaths(@NonNull List<String> videoPathsArg) {
+		currentVideoIndex = 0;
 		videoPaths.clear();
 		videoPaths.addAll(videoPathsArg);
 		setVideoURI(Uri.parse(videoPaths.get(currentVideoIndex)), null);
 	}
 
 	/**
-	 *
+	 * 设置单个播放路径
 	 * @param videoPathsArg
 	 */
-	public void setVideoPath(@NonNull String videoPathsArg){
-		currentVideoIndex=0;
+	public void setVideoPath(@NonNull String videoPathsArg) {
+		currentVideoIndex = 0;
 		videoPaths.clear();
 		videoPaths.add(videoPathsArg);
 		setVideoURI(Uri.parse(videoPaths.get(currentVideoIndex)), null);
@@ -231,15 +228,18 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 
 
 	/**
-	 *
+	 * 添加一个播放路径
 	 * @param videoPathsArg
 	 */
-	public void addVideoPath(@NonNull String videoPathsArg){
+	public void addVideoPath(@NonNull String videoPathsArg) {
 		videoPaths.add(videoPathsArg);
 	}
 
-	public void playNextVideo(){
-		currentVideoIndex=(currentVideoIndex+1)%videoPaths.size();
+	/**
+	 * 播放下一个视频
+	 */
+	public void playNextVideo() {
+		currentVideoIndex = (currentVideoIndex + 1) % videoPaths.size();
 		setVideoURI(Uri.parse(videoPaths.get(currentVideoIndex)), null);
 	}
 
@@ -264,24 +264,6 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 				break;
 		}
 	}
-
-//	/**
-//	 * Sets video path.
-//	 *
-//	 * @param path the path of the video.
-//	 */
-//	public void setVideoPath(String path) {
-//		setVideoURI(Uri.parse(path), null);
-//	}
-
-//	/**
-//	 * Sets video URI.
-//	 *
-//	 * @param uri the URI of the video.
-//	 */
-//	public void setVideoURI(Uri uri) {
-//		setVideoURI(uri, null);
-//	}
 
 	/**
 	 * Sets video URI using specific headers.
@@ -461,12 +443,11 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 	private OnInfoListener mInfoListener =
 			new OnInfoListener() {
 				public boolean onInfo(MediaPlayer mp, int arg1, int arg2) {
-					Log.e(TAG,arg1+"    info   "+arg2);
+					Log.e(TAG, arg1 + "    info   " + arg2);
 					if (mOnInfoListener != null) {
 						mOnInfoListener.onInfo(mp, arg1, arg2);
 					}
 					if (arg1 == MediaPlayer.MEDIA_INFO_BUFFERING_START) {//你不要弄反了
-
 //						mMediaPlayer.pause();  //不用了，jni 会自动的pause
 					} else if (arg1 == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
 //						mMediaPlayer.start();
@@ -482,7 +463,6 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 					Log.d(TAG, "Error: " + framework_err + "," + impl_err);
 
 					mediaErrorDispose(framework_err, impl_err);
-
 
 					mCurrentState = STATE_ERROR;
 					mTargetState = STATE_ERROR;
@@ -537,7 +517,7 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 			new MediaPlayer.OnBufferingUpdateListener() {
 				public void onBufferingUpdate(MediaPlayer mp, int percent) {
 					mCurrentBufferPercentage = percent;
-					Log.e(TAG,"percent"+percent);
+					Log.e(TAG, "percent" + percent);
 				}
 			};
 
