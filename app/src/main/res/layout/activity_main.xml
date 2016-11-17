@@ -8,13 +8,20 @@
               android:background="#88336699"
               tools:context="com.anylife.customvideoview.MainActivity">
 
+
+    <VideoView
+        android:id="@+id/videoView1"
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:layout_marginTop="20dp"
+        />
+
     <com.anylife.customvideoview.LiveVideoView
         android:id="@+id/videoView"
         android:layout_width="match_parent"
         android:layout_height="220dp"
         android:layout_marginTop="20dp"
-        android:visibility="visible"
-
+        android:visibility="gone"
         />
 
     <com.anylife.customvideoview.VideoView.CustomVideoView
