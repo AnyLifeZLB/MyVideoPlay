@@ -1,9 +1,6 @@
 package com.anylife.customvideoview.VideoView;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -11,6 +8,7 @@ import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnInfoListener;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -20,32 +18,37 @@ import android.view.SurfaceView;
 import android.widget.MediaController;
 import android.widget.MediaController.MediaPlayerControl;
 
-import com.anylife.customvideoview.R;
-
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
- * Displays a video file.  The VideoView class
- * can load images from various sources (such as resources or content
- * providers), takes care of computing its measurement from the video so that
- * it can be used in any layout manager, and provides various display options
- * such as scaling and tinting.<p>
- * <p>
- * <em>Note: VideoView does not retain its full state when going into the
- * background.</em>  In particular, it does not restore the current play state,
- * play position, selected tracks, or any subtitle tracks added via
- * Applications should
- * save and restore these on their own in
- * {@link android.app.Activity#onSaveInstanceState} and
- * {@link android.app.Activity#onRestoreInstanceState}.<p>
- * Also note that the audio session id (from {@link #getAudioSessionId}) may
- * change from its previously returned value when the VideoView is restored.
+ * 可以通用于播放HTTP、HLS、RTSP、Local File。如果部分设备不支持，可以使用软解（软解库可以使用FFPEG，本Demo没有）。
+ *
+ * @author liubao.zeng
+ * @version 2013-1-2 创建 ，修订2016-11-11，基于Android 6.0 的videoview 源码修订
+ *          <p>
+ *          <p>
+ *          Displays a video file.  The VideoView class
+ *          can load images from various sources (such as resources or content
+ *          providers), takes care of computing its measurement from the video so that
+ *          it can be used in any layout manager, and provides various display options
+ *          such as scaling and tinting.<p>
+ *          <p>
+ *          <em>Note: VideoView does not retain its full state when going into the
+ *          background.</em>  In particular, it does not restore the current play state,
+ *          play position, selected tracks, or any subtitle tracks added via
+ *          Applications should
+ *          save and restore these on their own in
+ *          {@link android.app.Activity#onSaveInstanceState} and
+ *          {@link android.app.Activity#onRestoreInstanceState}.<p>
+ *          Also note that the audio session id (from {@link #getAudioSessionId}) may
+ *          change from its previously returned value when the VideoView is restored.
  */
 public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
-	private String TAG = "VideoView";
+	private String TAG = "CustomVideoView";
 	// settable by the client
-	private Uri mUri;
 	private Map<String, String> mHeaders;
 
 	// all possible internal states
@@ -192,19 +195,84 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 		setFocusable(true);
 		setFocusableInTouchMode(true);
 		requestFocus();
-//		mPendingSubtitleTracks = new Vector<Pair<InputStream, MediaFormat>>();
 		mCurrentState = STATE_IDLE;
 		mTargetState = STATE_IDLE;
 	}
 
+
+
+	private Uri mUri;
+
+
+	List<String> videoPaths=new ArrayList<>();
+	int currentVideoIndex=0;
 	/**
-	 * Sets video path.
 	 *
-	 * @param path the path of the video.
+	 * @param videoPathsArg
 	 */
-	public void setVideoPath(String path) {
-		setVideoURI(Uri.parse(path), null);
+	public void setVideoPaths(@NonNull List<String> videoPathsArg){
+		currentVideoIndex=0;
+
+		videoPaths.clear();
+		videoPaths.addAll(videoPathsArg);
+		setVideoURI(Uri.parse(videoPaths.get(currentVideoIndex)), null);
 	}
+
+	/**
+	 *
+	 * @param videoPathsArg
+	 */
+	public void setVideoPath(@NonNull String videoPathsArg){
+		currentVideoIndex=0;
+		videoPaths.clear();
+		videoPaths.add(videoPathsArg);
+		setVideoURI(Uri.parse(videoPaths.get(currentVideoIndex)), null);
+	}
+
+
+	/**
+	 *
+	 * @param videoPathsArg
+	 */
+	public void addVideoPath(@NonNull String videoPathsArg){
+		videoPaths.add(videoPathsArg);
+	}
+
+	public void playNextVideo(){
+		currentVideoIndex=(currentVideoIndex+1)%videoPaths.size();
+		setVideoURI(Uri.parse(videoPaths.get(currentVideoIndex)), null);
+	}
+
+	/**
+	 * 错误处理
+	 */
+	private void mediaErrorDispose(int framework_err, int impl_err) {
+		switch (framework_err) {
+			case MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK:
+				// 视频不可以回退
+				break;
+			case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
+				Log.d(TAG, "流媒体服务器端异常!");
+				playNextVideo();
+				break;
+			case MediaPlayer.MEDIA_ERROR_UNKNOWN:
+				Log.d(TAG, "不能播放的视频文件！");
+//                playNextVideo();
+				break;
+			default:              //不知道的错误类型不知道怎样处理
+				playNextVideo();
+				break;
+		}
+	}
+
+//	/**
+//	 * Sets video path.
+//	 *
+//	 * @param path the path of the video.
+//	 */
+//	public void setVideoPath(String path) {
+//		setVideoURI(Uri.parse(path), null);
+//	}
 
 //	/**
 //	 * Sets video URI.
@@ -262,18 +330,6 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 
 		try {
 			mMediaPlayer = new MediaPlayer();
-			// TODO: create SubtitleController in MediaPlayer, but we need
-			// a context for the subtitle renderers
-//            final Context context = getContext();
-
-//            final SubtitleController controller = new SubtitleController(
-//                    context, mMediaPlayer.getMediaTimeProvider(), mMediaPlayer);
-//            controller.registerRenderer(new WebVttRenderer(context));
-//            controller.registerRenderer(new TtmlRenderer(context));
-//            controller.registerRenderer(new Cea708CaptionRenderer(context));
-//            controller.registerRenderer(new ClosedCaptionRenderer(context));
-//            mMediaPlayer.setSubtitleAnchor(controller, this);
-
 			if (mAudioSession != 0) {
 				mMediaPlayer.setAudioSessionId(mAudioSession);
 			} else {
@@ -291,15 +347,6 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 			mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 			mMediaPlayer.setScreenOnWhilePlaying(true);
 			mMediaPlayer.prepareAsync();
-
-//            for (Pair<InputStream, MediaFormat> pending: mPendingSubtitleTracks) {
-//                try {
-//                    mMediaPlayer.addSubtitleSource(pending.first, pending.second);
-//                } catch (IllegalStateException e) {
-//                    mInfoListener.onInfo(
-//                            mMediaPlayer, MediaPlayer.MEDIA_INFO_UNSUPPORTED_SUBTITLE, 0);
-//                }
-//            }
 
 			// we don't set the target state here either, but preserve the
 			// target state that was there before.
@@ -322,23 +369,6 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 		}
 	}
 
-//	public void setMediaController(MediaController controller) {
-//		if (mMediaController != null) {
-//			mMediaController.hide();
-//		}
-//		mMediaController = controller;
-//		attachMediaController();
-//	}
-
-//	private void attachMediaController() {
-//		if (mMediaPlayer != null && mMediaController != null) {
-//			mMediaController.setMediaPlayer(this);
-//			View anchorView = this.getParent() instanceof View ?
-//					(View) this.getParent() : this;
-//			mMediaController.setAnchorView(anchorView);
-//			mMediaController.setEnabled(isInPlaybackState());
-//		}
-//	}
 
 	MediaPlayer.OnVideoSizeChangedListener mSizeChangedListener =
 			new MediaPlayer.OnVideoSizeChangedListener() {
@@ -356,9 +386,19 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 		public void onPrepared(MediaPlayer mp) {
 			mCurrentState = STATE_PREPARED;
 
-
+			// Get the capabilities of the player for this stream
+//			Metadata data = mp.getMetadata(MediaPlayer.METADATA_ALL, MediaPlayer.BYPASS_METADATA_FILTER);
+//
+//			if (data != null) {
+//				mCanPause = !data.has(Metadata.PAUSE_AVAILABLE)
+//						|| data.getBoolean(Metadata.PAUSE_AVAILABLE);
+//				mCanSeekBack = !data.has(Metadata.SEEK_BACKWARD_AVAILABLE)
+//						|| data.getBoolean(Metadata.SEEK_BACKWARD_AVAILABLE);
+//				mCanSeekForward = !data.has(Metadata.SEEK_FORWARD_AVAILABLE)
+//						|| data.getBoolean(Metadata.SEEK_FORWARD_AVAILABLE);
+//			}else
 			{
-				mCanPause = mCanSeekBack = mCanSeekForward = false;  //手动修改为False
+				mCanPause = mCanSeekBack = mCanSeekForward = true;
 			}
 
 			if (mOnPreparedListener != null) {
@@ -378,8 +418,6 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 				//Log.i("@@@@", "video size: " + mVideoWidth +"/"+ mVideoHeight);
 				getHolder().setFixedSize(mVideoWidth, mVideoHeight);
 				if (mSurfaceWidth == mVideoWidth && mSurfaceHeight == mVideoHeight) {
-
-//					mTargetState = STATE_PLAYING;//手动加上去的，不加上去不会start开始播放的啊！
 
 					// We didn't actually change the size (it was already at the size
 					// we need), so we won't get a "surface changed" callback, so
@@ -423,9 +461,17 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 	private OnInfoListener mInfoListener =
 			new OnInfoListener() {
 				public boolean onInfo(MediaPlayer mp, int arg1, int arg2) {
+					Log.e(TAG,arg1+"    info   "+arg2);
 					if (mOnInfoListener != null) {
 						mOnInfoListener.onInfo(mp, arg1, arg2);
 					}
+					if (arg1 == MediaPlayer.MEDIA_INFO_BUFFERING_START) {//你不要弄反了
+
+//						mMediaPlayer.pause();  //不用了，jni 会自动的pause
+					} else if (arg1 == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
+//						mMediaPlayer.start();
+					}
+
 					return true;
 				}
 			};
@@ -434,6 +480,10 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 			new OnErrorListener() {
 				public boolean onError(MediaPlayer mp, int framework_err, int impl_err) {
 					Log.d(TAG, "Error: " + framework_err + "," + impl_err);
+
+					mediaErrorDispose(framework_err, impl_err);
+
+
 					mCurrentState = STATE_ERROR;
 					mTargetState = STATE_ERROR;
 					if (mMediaController != null) {
@@ -452,33 +502,33 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
              * if we're attached to a window. When we're going away and no
              * longer have a window, don't bother showing the user an error.
              */
-					if (getWindowToken() != null) {
-						Resources r = mContext.getResources();
-						int messageId;
-
-						if (framework_err == MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK) {
-							messageId = R.string.VideoView_error_text_invalid_progressive_playback;
-						} else {
-							messageId = R.string.VideoView_error_text_unknown;
-						}
-
-						new AlertDialog.Builder(mContext)
-								.setMessage(messageId)
-								.setPositiveButton("OK",
-										new DialogInterface.OnClickListener() {
-											public void onClick(DialogInterface dialog, int whichButton) {
-										/* If we get here, there is no onError listener, so
-										 * at least inform them that the video is over.
-                                         */
-												if (mOnCompletionListener != null) {
-													mOnCompletionListener.onCompletion(mMediaPlayer);
-												}
-											}
-										})
-								.setCancelable(false)
-								.show();
-
-					}
+//					if (getWindowToken() != null) {
+//						Resources r = mContext.getResources();
+//						int messageId;
+//
+//						if (framework_err == MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK) {
+//							messageId = R.string.VideoView_error_text_invalid_progressive_playback;
+//						} else {
+//							messageId = R.string.VideoView_error_text_unknown;
+//						}
+//
+//						new AlertDialog.Builder(mContext)
+//								.setMessage(messageId)
+//								.setPositiveButton("OK",
+//										new DialogInterface.OnClickListener() {
+//											public void onClick(DialogInterface dialog, int whichButton) {
+//										/* If we get here, there is no onError listener, so
+//										 * at least inform them that the video is over.
+//                                         */
+//												if (mOnCompletionListener != null) {
+//													mOnCompletionListener.onCompletion(mMediaPlayer);
+//												}
+//											}
+//										})
+//								.setCancelable(false)
+//								.show();
+//
+//					}
 					return true;
 				}
 			};
@@ -487,6 +537,7 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 			new MediaPlayer.OnBufferingUpdateListener() {
 				public void onBufferingUpdate(MediaPlayer mp, int percent) {
 					mCurrentBufferPercentage = percent;
+					Log.e(TAG,"percent"+percent);
 				}
 			};
 
@@ -533,8 +584,7 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 	}
 
 	SurfaceHolder.Callback mSHCallback = new SurfaceHolder.Callback() {
-		public void surfaceChanged(SurfaceHolder holder, int format,
-								   int w, int h) {
+		public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
 			mSurfaceWidth = w;
 			mSurfaceHeight = h;
 			boolean isValidState = (mTargetState == STATE_PLAYING);
@@ -568,7 +618,6 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 			mMediaPlayer.reset();
 			mMediaPlayer.release();
 			mMediaPlayer = null;
-//			mPendingSubtitleTracks.clear();
 			mCurrentState = STATE_IDLE;
 			if (cleartargetstate) {
 				mTargetState = STATE_IDLE;
@@ -747,100 +796,25 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 	protected void onAttachedToWindow() {
 		super.onAttachedToWindow();
 
-//        if (mSubtitleWidget != null) {
-//            mSubtitleWidget.onAttachedToWindow();
-//        }
 	}
 
 	@Override
 	protected void onDetachedFromWindow() {
 		super.onDetachedFromWindow();
 
-//        if (mSubtitleWidget != null) {
-//            mSubtitleWidget.onDetachedFromWindow();
-//        }
 	}
 
 	@Override
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		super.onLayout(changed, left, top, right, bottom);
 
-//        if (mSubtitleWidget != null) {
-//            measureAndLayoutSubtitleWidget();
-//        }
 	}
 
 	@Override
 	public void draw(Canvas canvas) {
 		super.draw(canvas);
 
-//        if (mSubtitleWidget != null) {
-//            final int saveCount = canvas.save();
-//            canvas.translate(getPaddingLeft(), getPaddingTop());
-//            mSubtitleWidget.draw(canvas);
-//            canvas.restoreToCount(saveCount);
-//        }
 	}
-
-//    /**
-//     * Forces a measurement and layout pass for all overlaid views.
-//     *
-//     * @see #setSubtitleWidget(RenderingWidget)
-//     */
-//    private void measureAndLayoutSubtitleWidget() {
-//        final int width = getWidth() - getPaddingLeft() - getPaddingRight();
-//        final int height = getHeight() - getPaddingTop() - getPaddingBottom();
-//
-//        mSubtitleWidget.setSize(width, height);
-//    }
-
-//    /** @hide */
-//    @Override
-//    public void setSubtitleWidget(RenderingWidget subtitleWidget) {
-//        if (mSubtitleWidget == subtitleWidget) {
-//            return;
-//        }
-//
-//        final boolean attachedToWindow = isAttachedToWindow();
-//        if (mSubtitleWidget != null) {
-//            if (attachedToWindow) {
-//                mSubtitleWidget.onDetachedFromWindow();
-//            }
-//
-//            mSubtitleWidget.setOnChangedListener(null);
-//        }
-//
-//        mSubtitleWidget = subtitleWidget;
-//
-//        if (subtitleWidget != null) {
-//            if (mSubtitlesChangedListener == null) {
-//                mSubtitlesChangedListener = new RenderingWidget.OnChangedListener() {
-//                    @Override
-//                    public void onChanged(RenderingWidget renderingWidget) {
-//                        invalidate();
-//                    }
-//                };
-//            }
-//
-//            setWillNotDraw(false);
-//            subtitleWidget.setOnChangedListener(mSubtitlesChangedListener);
-//
-//            if (attachedToWindow) {
-//                subtitleWidget.onAttachedToWindow();
-//                requestLayout();
-//            }
-//        } else {
-//            setWillNotDraw(true);
-//        }
-//
-//        invalidate();
-//    }
-//
-//    /** @hide */
-//    @Override
-//    public Looper getSubtitleLooper() {
-//        return Looper.getMainLooper();
-//    }
 
 
 }
