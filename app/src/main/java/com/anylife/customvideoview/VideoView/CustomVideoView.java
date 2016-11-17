@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.media.AudioManager;
-import android.media.MediaFormat;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
@@ -14,21 +13,17 @@ import android.media.MediaPlayer.OnInfoListener;
 import android.net.Uri;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
 import android.widget.MediaController;
 import android.widget.MediaController.MediaPlayerControl;
 
 import com.anylife.customvideoview.R;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
-import java.util.Vector;
 
 /**
  * Displays a video file.  The VideoView class
@@ -197,7 +192,7 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 		setFocusable(true);
 		setFocusableInTouchMode(true);
 		requestFocus();
-		mPendingSubtitleTracks = new Vector<Pair<InputStream, MediaFormat>>();
+//		mPendingSubtitleTracks = new Vector<Pair<InputStream, MediaFormat>>();
 		mCurrentState = STATE_IDLE;
 		mTargetState = STATE_IDLE;
 	}
@@ -239,7 +234,7 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 		invalidate();
 	}
 
-	private Vector<Pair<InputStream, MediaFormat>> mPendingSubtitleTracks;
+//	private Vector<Pair<InputStream, MediaFormat>> mPendingSubtitleTracks;
 
 	public void stopPlayback() {
 		if (mMediaPlayer != null) {
@@ -309,7 +304,7 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 			// we don't set the target state here either, but preserve the
 			// target state that was there before.
 			mCurrentState = STATE_PREPARING;
-			attachMediaController();
+//			attachMediaController();
 		} catch (IOException ex) {
 			Log.w(TAG, "Unable to open content: " + mUri, ex);
 			mCurrentState = STATE_ERROR;
@@ -323,27 +318,27 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 			mErrorListener.onError(mMediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
 			return;
 		} finally {
-			mPendingSubtitleTracks.clear();
+//			mPendingSubtitleTracks.clear();
 		}
 	}
 
-	public void setMediaController(MediaController controller) {
-		if (mMediaController != null) {
-			mMediaController.hide();
-		}
-		mMediaController = controller;
-		attachMediaController();
-	}
+//	public void setMediaController(MediaController controller) {
+//		if (mMediaController != null) {
+//			mMediaController.hide();
+//		}
+//		mMediaController = controller;
+//		attachMediaController();
+//	}
 
-	private void attachMediaController() {
-		if (mMediaPlayer != null && mMediaController != null) {
-			mMediaController.setMediaPlayer(this);
-			View anchorView = this.getParent() instanceof View ?
-					(View) this.getParent() : this;
-			mMediaController.setAnchorView(anchorView);
-			mMediaController.setEnabled(isInPlaybackState());
-		}
-	}
+//	private void attachMediaController() {
+//		if (mMediaPlayer != null && mMediaController != null) {
+//			mMediaController.setMediaPlayer(this);
+//			View anchorView = this.getParent() instanceof View ?
+//					(View) this.getParent() : this;
+//			mMediaController.setAnchorView(anchorView);
+//			mMediaController.setEnabled(isInPlaybackState());
+//		}
+//	}
 
 	MediaPlayer.OnVideoSizeChangedListener mSizeChangedListener =
 			new MediaPlayer.OnVideoSizeChangedListener() {
@@ -361,22 +356,9 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 		public void onPrepared(MediaPlayer mp) {
 			mCurrentState = STATE_PREPARED;
 
-//            // Get the capabilities of the player for this stream
-//            Metadata data = mp.getMetadata(MediaPlayer.METADATA_ALL,
-//                                      MediaPlayer.BYPASS_METADATA_FILTER);
-//
-//            if (data != null) {
-//                mCanPause = !data.has(Metadata.PAUSE_AVAILABLE)
-//                        || data.getBoolean(Metadata.PAUSE_AVAILABLE);
-//                mCanSeekBack = !data.has(Metadata.SEEK_BACKWARD_AVAILABLE)
-//                        || data.getBoolean(Metadata.SEEK_BACKWARD_AVAILABLE);
-//                mCanSeekForward = !data.has(Metadata.SEEK_FORWARD_AVAILABLE)
-//                        || data.getBoolean(Metadata.SEEK_FORWARD_AVAILABLE);
-//            } else
-
 
 			{
-				mCanPause = mCanSeekBack = mCanSeekForward = true;
+				mCanPause = mCanSeekBack = mCanSeekForward = false;  //手动修改为False
 			}
 
 			if (mOnPreparedListener != null) {
@@ -396,6 +378,9 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 				//Log.i("@@@@", "video size: " + mVideoWidth +"/"+ mVideoHeight);
 				getHolder().setFixedSize(mVideoWidth, mVideoHeight);
 				if (mSurfaceWidth == mVideoWidth && mSurfaceHeight == mVideoHeight) {
+
+//					mTargetState = STATE_PLAYING;//手动加上去的，不加上去不会start开始播放的啊！
+
 					// We didn't actually change the size (it was already at the size
 					// we need), so we won't get a "surface changed" callback, so
 					// start the video here instead of in the callback.
@@ -404,8 +389,7 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 						if (mMediaController != null) {
 							mMediaController.show();
 						}
-					} else if (!isPlaying() &&
-							(seekToPosition != 0 || getCurrentPosition() > 0)) {
+					} else if (!isPlaying() && (seekToPosition != 0 || getCurrentPosition() > 0)) {
 						if (mMediaController != null) {
 							// Show the media controls when we're paused into a video and make 'em stick.
 							mMediaController.show(0);
@@ -584,7 +568,7 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 			mMediaPlayer.reset();
 			mMediaPlayer.release();
 			mMediaPlayer = null;
-			mPendingSubtitleTracks.clear();
+//			mPendingSubtitleTracks.clear();
 			mCurrentState = STATE_IDLE;
 			if (cleartargetstate) {
 				mTargetState = STATE_IDLE;
