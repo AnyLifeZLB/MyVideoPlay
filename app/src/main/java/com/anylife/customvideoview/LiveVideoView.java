@@ -22,11 +22,11 @@ import java.util.Vector;
 
 /**
  * 可以通用于播放HTTP、HLS、RTSP、Local File。如果部分设备不支持，可以使用软解（软解库将使用FFPEG）。
- *
+ *  See CustomVideoView
  * @author liubao.zeng
  * @version 2013-1-2 创建时间
  */
-
+@Deprecated
 public class LiveVideoView extends SurfaceView implements MediaPlayerControl {
     private String TAG = "VideoView";
     private String TAG2 = "VideoViewDebug";

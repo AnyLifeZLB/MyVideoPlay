@@ -206,6 +206,7 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 
 	/**
 	 * 设置播放路径集合
+	 *
 	 * @param videoPathsArg
 	 */
 	public void setVideoPaths(@NonNull List<String> videoPathsArg) {
@@ -217,6 +218,7 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 
 	/**
 	 * 设置单个播放路径
+	 *
 	 * @param videoPathsArg
 	 */
 	public void setVideoPath(@NonNull String videoPathsArg) {
@@ -229,6 +231,7 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 
 	/**
 	 * 添加一个播放路径
+	 *
 	 * @param videoPathsArg
 	 */
 	public void addVideoPath(@NonNull String videoPathsArg) {
@@ -257,7 +260,7 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 				break;
 			case MediaPlayer.MEDIA_ERROR_UNKNOWN:
 				Log.d(TAG, "不能播放的视频文件！");
-//                playNextVideo();
+//                playNextVideo();  //直播的时候好像会经常出现这个问题！
 				break;
 			default:              //不知道的错误类型不知道怎样处理
 				playNextVideo();
