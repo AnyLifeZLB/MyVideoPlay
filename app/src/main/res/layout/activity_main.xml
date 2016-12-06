@@ -8,14 +8,21 @@
               android:background="#88336699"
               tools:context="com.anylife.customvideoview.MainActivity">
 
+    <com.anylife.customvideoview.VideoView.CustomVideoView
+        android:id="@+id/custom_videoView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        />
+
+    <!--
 
     <VideoView
         android:id="@+id/videoView1"
         android:layout_width="match_parent"
         android:layout_height="220dp"
-        android:layout_marginTop="2dp"
+        android:layout_marginTop="20dp"
         android:visibility="gone"
-
         />
 
     <com.anylife.customvideoview.LiveVideoView
@@ -26,13 +33,6 @@
         android:visibility="gone"
         />
 
-    <com.anylife.customvideoview.VideoView.CustomVideoView
-        android:id="@+id/custom_videoView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="0dp"
-
-        />
-
+        -->
 
 </LinearLayout>

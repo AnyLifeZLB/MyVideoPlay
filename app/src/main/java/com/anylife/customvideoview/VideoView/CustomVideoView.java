@@ -24,7 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 可以通用于播放HTTP、HLS、RTSP、Local File。如果部分设备不支持，可以使用软解（软解库可以使用FFPEG，本Demo没有）。
+ * 可以通用于播放HTTP、HLS、RTSP、Local File。如果部分设备不支持，可以使用软解（软解库可以使用FFPEG等，本Demo没有）。
+ * 这只是基本裁剪，没有多余的功能，优化
  *
  * @author liubao.zeng
  * @version 2013-1-2 创建 ，修订2016-11-11，基于Android 6.0 的videoview 源码修订
@@ -114,10 +115,15 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 //        initVideoView();
 //    }
 
+	/**
+	 * 测量视图的大小,这应该是最复杂的视图绘制流程了！你也可以简单一点的改写
+	 *
+	 * @param widthMeasureSpec    由父视图经过计算后传递给子视图的
+	 * @param heightMeasureSpec   由父视图经过计算后传递给子视图的
+	 */
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		//Log.i("@@@@", "onMeasure(" + MeasureSpec.toString(widthMeasureSpec) + ", "
-		//        + MeasureSpec.toString(heightMeasureSpec) + ")");
+		Log.i("View", "onMeasure(" + MeasureSpec.toString(widthMeasureSpec) + ", " + MeasureSpec.toString(heightMeasureSpec) + ")");
 
 		int width = getDefaultSize(mVideoWidth, widthMeasureSpec);
 		int height = getDefaultSize(mVideoHeight, heightMeasureSpec);
@@ -135,10 +141,10 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 
 				// for compatibility, we adjust size based on aspect ratio
 				if (mVideoWidth * height < width * mVideoHeight) {
-					//Log.i("@@@", "image too wide, correcting");
+					Log.i("View", "image too wide, correcting");
 					width = height * mVideoWidth / mVideoHeight;
 				} else if (mVideoWidth * height > width * mVideoHeight) {
-					//Log.i("@@@", "image too tall, correcting");
+					Log.i("View", "image too tall, correcting");
 					height = width * mVideoHeight / mVideoWidth;
 				}
 			} else if (widthSpecMode == MeasureSpec.EXACTLY) {
@@ -174,6 +180,9 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 			}
 		} else {
 			// no size yet, just adopt the given spec sizes
+
+
+
 		}
 		setMeasuredDimension(width, height);
 	}
@@ -262,7 +271,7 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 				Log.d(TAG, "不能播放的视频文件！");
 //                playNextVideo();  //直播的时候好像会经常出现这个问题！
 				break;
-			default:              //不知道的错误类型不知道怎样处理
+			default:                //不知道的错误类型不知道怎样处理
 				playNextVideo();
 				break;
 		}
@@ -400,7 +409,7 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 				seekTo(seekToPosition);
 			}
 			if (mVideoWidth != 0 && mVideoHeight != 0) {
-				//Log.i("@@@@", "video size: " + mVideoWidth +"/"+ mVideoHeight);
+				//Log.i("View@", "video size: " + mVideoWidth +"/"+ mVideoHeight);
 				getHolder().setFixedSize(mVideoWidth, mVideoHeight);
 				if (mSurfaceWidth == mVideoWidth && mSurfaceHeight == mVideoHeight) {
 
@@ -790,13 +799,13 @@ public class CustomVideoView extends SurfaceView implements MediaPlayerControl {
 	@Override
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		super.onLayout(changed, left, top, right, bottom);
-
+		Log.i("View","onLayout：   changed"+changed+"   left:"+left+"    Top:"+top+"   right:"+right+"  bottom:"+bottom);
 	}
 
 	@Override
 	public void draw(Canvas canvas) {
 		super.draw(canvas);
-
+		Log.i("View","onLayout：   canvas"+canvas.toString());
 	}
 
 
